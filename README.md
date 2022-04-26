@@ -1,20 +1,48 @@
-OTOBO comes with official support for Docker.
+### Otobo
 
-See the "Installation and Update" manual, which is available at https://doc.otobo.org,
-for more information on how the get started.
+E' possibile trovare la guida di installazione di Otobo nella documentazione del progetto a questo link:
 
-Here is quick overview over the files in this distribution. Note that some of the files are hidden
-and are only listed with ls -a.
+https://doc.otobo.org/manual/installation/10.1/en/content/installation-docker.html
 
-    - .docker_compose_env_http                  sample .env file for a HTTP based installation
-    - .docker_compose_env_https                 sample .env file for a HTTPS based installation
-    - .docker_compose_env_https_custom_nginx    sample .env file for a HTTPS based installation with custom Nginx config
-    - .docker_compose_env_https_kerberos        sample .env file for a HTTPS based installation with support for Kerberos
-    - .docker_compose_env_http_selenium         sample .env file for development, support Selenium testing via HTTP
-    - .docker_compose_env_https_selenium        sample .env file for development, support Selenium testing via HTTPS
-    - .env                                      Docker Compose environment file, must be created by the user
-    - docker-compose                            directory with Docker Compose configuration snippets
-    - etc/templates/dot_env.m4                  template file used by create_sample_env_files.sh
-    - scripts/devel/create_sample_env_files.sh  a small helper for creating the sample env files
-    - scripts/devel/generate_dot_env.sh         a small helper for recreating .env from dot_env.m4
-    - scripts/update.sh                         a small helper for updating to updated images
+
+
+### Configurazione custom
+	
+Nel contesto della messa in opera nell'infrastruttura Saas	non è stata seguita la documentazione del progetto, 
+in quanto gli sviluppatori eseguono la messa in opera del servizio mediante l'utilizzio di alcuni docker-compose.yml 
+Custon contenuti nella cartella docker-compose.
+
+Al fine di eseguire il deploy su Saas è stato creato un file docker-compose.yml di cui una copia si trova in questo repo.
+E che permette il normale deploy dell'applicazione con SWARM.
+
+### Elenco volumi statici
+
+Redis
+
+    redis_data:/data
+
+
+Elastisearch
+
+    elasticsearch_data:/usr/share/elasticsearch/data
+
+Otobo
+
+    opt_otobo:/opt/otobo
+
+
+Database (mariadb)
+
+    mariadb_data:/var/lib/mysql
+
+### Configurazione custom per DEV
+
+Nel caso dello stack DEV è stata aggiunta una network diversa otobo-dev-net (invece di otobo-net)
+e sono stati cambiati i nomi dei servizi nel docker-compose.yml aggiungento il suffisso -dev (es.
+db-dev), per differenziarli da quello di Produzione (risolvento un problema di routing di Traefik).
+
+Questa modifica va riportata nel file "Config.pm" nel folder "opt_otobo/Kernel".
+
+In questo file è riportato l'hostname con cui vengono richiamati i servizi nella rete docker, quindi
+se i nomi vengono modificati del docker-compose.yml, poi devono essere modificati anche in questo file
+prima di inizializzare il deploy.
