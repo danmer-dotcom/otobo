@@ -1,0 +1,145 @@
+version: '3.3'
+
+networks:
+  otobo-net:
+     external:
+       name: otobo-net
+  shared-saas_frontend:
+     external:
+       name: shared-saas_frontend
+
+services:
+
+
+  db:
+    image: registry.cdpsaas.cs1.cloudspc.it/shared-saas/mariadb_10_5:latest
+    networks:
+      - otobo-net
+    deploy:
+      placement:
+        constraints:
+          - node.role==worker
+      update_config:
+        parallelism: 1
+        delay: 10s
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 10s
+    user: mysql:mysql
+    env_file: .env
+    volumes:
+      - /mnt/DOCKERVOLUMES-NEW/otobo/mariadb_data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${OTOBO_DB_ROOT_PASSWORD}
+    command: --max-allowed-packet=68157440 --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --innodb-log-file-size=268435456 --query-cache-size=${OTOBO_DB_QUERY_CACHE_SIZE:-33554432}
+       
+  # a container running a webserver the services 'web' and 'daemon' use the same image.
+  web:
+    image: registry.cdpsaas.cs1.cloudspc.it/shared-saas/otobo_10_1_1:latest
+    networks:
+      - otobo-net
+      - shared-saas_frontend
+    deploy:
+      labels:
+        - "traefik.frontend.entryPoints=http,https"
+        - "traefik.docker.network=shared-saas_frontend"
+        - "traefik.port=5000"
+        - "traefik.http.redirect=https"
+        - "traefik.frontend.rule=Host:otobo.cdpsaas.cs1.cloudspc.it"      
+      placement:
+        constraints:
+          - node.role==worker
+      update_config:
+        parallelism: 1
+        delay: 10s
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 10s
+    
+    # The HTTP port might be specified in a docker-compose extension file, e.g. docker-compose/otobo-override-http.yml.
+    # For HTTPS no HTTP port is exposed.
+    #ports:
+    #      - "80:5000"
+    env_file: .env
+    volumes:
+      - /mnt/DOCKERVOLUMES-NEW/otobo/opt_otobo:/opt/otobo
+    environment:
+      OTOBO_SYNC_WITH_S3: ${OTOBO_SYNC_WITH_S3:-0}
+    command: web
+
+  # a container running the OTOBO daemon
+  daemon:
+    # The services 'web' and 'daemon' use the same image.
+    image: registry.cdpsaas.cs1.cloudspc.it/shared-saas/otobo_10_1_1:latest
+    networks:
+      - otobo-net
+      - shared-saas_frontend
+    deploy:
+      placement:
+        constraints:
+          - node.role==worker
+      update_config:
+        parallelism: 1
+        delay: 10s
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 10s
+    env_file: .env
+    volumes:
+      - /mnt/DOCKERVOLUMES-NEW/otobo/opt_otobo:/opt/otobo
+    environment:
+      OTOBO_SYNC_WITH_S3: ${OTOBO_SYNC_WITH_S3:-0}
+    command: daemon
+
+  # a container running Elasticsearch
+  elastic:
+    image: registry.cdpsaas.cs1.cloudspc.it/shared-saas/otobo-elasticsearch_10_1_1:latest
+    networks:
+      - otobo-net
+    deploy:
+      placement:
+        constraints:
+          - node.role==worker
+      update_config:
+        parallelism: 1
+        delay: 10s
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 10s
+    environment:
+      discovery.type: single-node
+      ES_JAVA_OPTS: ${OTOBO_ELASTICSEARCH_ES_JAVA_OPTS}
+    env_file: .env
+    volumes:
+      - /mnt/DOCKERVOLUMES-NEW/otobo/elasticsearch_data:/usr/share/elasticsearch/data
+
+  # a container running Redis
+  redis:
+    image: registry.cdpsaas.cs1.cloudspc.it/shared-saas/redis_6_0_alpine:latest
+    networks:
+      - otobo-net
+    deploy:
+      placement:
+        constraints:
+          - node.role==worker
+      update_config:
+        parallelism: 1
+        delay: 10s
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 10s
+    user: redis:redis
+    env_file: .env
+    volumes:
+      - /mnt/DOCKERVOLUMES-NEW/otobo/redis_data:/data
+
