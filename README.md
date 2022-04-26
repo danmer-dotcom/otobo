@@ -43,6 +43,6 @@ db-dev), per differenziarli da quello di Produzione (risolvento un problema di r
 
 Questa modifica va riportata nel file "Config.pm" nel folder "opt_otobo/Kernel".
 
-In questo file è riportato l'hostname con cui vengono richiamati i servizi nella rete docker, quindi
-se i nomi vengono modificati del docker-compose.yml, poi devono essere modificati anche in questo file
+In questo file è riportato l'hostname con cui vengono richiamati i servizi nella rete docker, dunque
+se i nomi vengono modificati nel docker-compose.yml, devono essere modificati anche in questo file
 prima di inizializzare il deploy.
