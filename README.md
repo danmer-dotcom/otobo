@@ -8,12 +8,13 @@ https://doc.otobo.org/manual/installation/10.1/en/content/installation-docker.ht
 
 ### Configurazione custom
 	
-Nel contesto della messa in opera nell'infrastruttura Saas	non è stata seguita la documentazione del progetto, 
+Nel contesto della messa in opera nell'infrastruttura Saas NON è stata seguita la documentazione del progetto, 
 in quanto gli sviluppatori eseguono la messa in opera del servizio mediante l'utilizzio di alcuni docker-compose.yml 
-Custon contenuti nella cartella docker-compose.
+Custon contenuti nella cartella docker-compose (CHE NON USEREMO).
 
 Al fine di eseguire il deploy su Saas è stato creato un file docker-compose.yml di cui una copia si trova in questo repo.
-E che permette il normale deploy dell'applicazione con SWARM.
+
+che permette il normale deploy dell'applicazione con SWARM.
 
 ### Elenco volumi statici
 
